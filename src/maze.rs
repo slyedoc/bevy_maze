@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 
-use maze_generator::prelude::*;
 use maze_generator::recursive_backtracking::RbGenerator;
+use maze_generator::prelude::{Coordinates, Direction as Direction, FieldType, Generator};
+
+/// Creates a SIZE x SIZE maze at world orgin
 
 use crate::maze::config::*;
-
-#[allow(dead_code)]
 mod config {
     use super::*;
 
@@ -20,10 +20,11 @@ mod config {
     pub const SHOW_GRID: bool = false;
 
     // Sizes
-    pub const MAZE_SIZE: (u8, u8) = (10u8, 10u8);
-    pub const CELL_SIZE: f32 = 50.0;
-    pub const MINOR_LINE_THICKNESS: f32 = 1.0;
-    pub const MAJOR_LINE_THICKNESS: f32 = 4.0;
+    pub const SIZE: u8 = 20u8;  // currently this controlls
+    pub const MAZE_SIZE: (u8, u8) = (30u8, SIZE);
+    pub const CELL_SIZE: f32 = 600.0 / MAZE_SIZE.0 as f32;
+    pub const MINOR_LINE_THICKNESS: f32 = CELL_SIZE * 0.01;
+    pub const MAJOR_LINE_THICKNESS: f32 = CELL_SIZE * 0.1;
 
     pub const MAZE_BOARD_SIZE: (f32, f32) = ( MAZE_SIZE.0 as f32 * CELL_SIZE, MAZE_SIZE.1 as f32 * CELL_SIZE);
     pub const MAZE_BOARD_LEFT_EDGE: f32 = - 0.5 * MAZE_BOARD_SIZE.0 as f32 ;
@@ -170,15 +171,21 @@ fn new_gridline(
 
 enum Cell {
     Normal,
-    Wall,
     Start,
     End
 }
 
+struct Wall;
+
 fn spawn_maze(mut commands: Commands, materials: Res<MazeMaterials>, size: Res<MazeSize>) {
 
-    let mut generator = RbGenerator::new(Some([42; 32]));
-    let maze = generator.generate(size.x as i32, size.y as i32);
+    let seed = Some([3; 32]);
+    let mut generator = RbGenerator::new(seed);
+    let mut maze = generator.generate(size.x as i32, size.y as i32);
+
+    maze.start = Coordinates {x: 0, y: 0 };
+    maze.goal = Coordinates {x: size.x as i32 - 1, y: size.y as i32 - 1};
+
 
     for x in 0..size.x {
         for y in 0..size.y {
@@ -213,38 +220,38 @@ fn spawn_maze(mut commands: Commands, materials: Res<MazeMaterials>, size: Res<M
                .id();
 
             // Draw walls for the cell
-            if !field.has_passage(&maze_generator::prelude::Direction::North) {
-                spawn_wall(&mut commands, cell, materials.wall_material.clone(), &maze_generator::prelude::Direction::North)
+            if !field.has_passage(&Direction::North) {
+                spawn_wall(&mut commands, cell, materials.wall_material.clone(), &Direction::North)
             }
-            if !field.has_passage(&maze_generator::prelude::Direction::South) {
-                spawn_wall(&mut commands, cell, materials.wall_material.clone(), &maze_generator::prelude::Direction::South)
+            if !field.has_passage(&Direction::South) {
+                spawn_wall(&mut commands, cell, materials.wall_material.clone(), &Direction::South)
             }
-            if !field.has_passage(&maze_generator::prelude::Direction::East) {
-                spawn_wall(&mut commands, cell, materials.wall_material.clone(), &maze_generator::prelude::Direction::East)
+            if !field.has_passage(&Direction::East) {
+                spawn_wall(&mut commands, cell, materials.wall_material.clone(), &Direction::East)
             }
-            if !field.has_passage(&maze_generator::prelude::Direction::West) {
-                spawn_wall(&mut commands, cell, materials.wall_material.clone(), &maze_generator::prelude::Direction::West)
+            if !field.has_passage(&Direction::West) {
+                spawn_wall(&mut commands, cell, materials.wall_material.clone(), &Direction::West)
             }
 
         }
     }
 }
 
-fn spawn_wall(commands: &mut Commands, parent: Entity,  material: Handle<ColorMaterial>, direction: &maze_generator::prelude::Direction) {
+// Draws a wall on a cell given a direction
+fn spawn_wall(commands: &mut Commands, parent: Entity,  material: Handle<ColorMaterial>, direction: &Direction) {
 
-    // Draw the walls,
-    // TODO: direction feels reversed, should refactor this
+    // TODO: direction feels reversed but it looks right, something is getting flipped or my understanding is off, look into this
     let (x, y, size) = match direction {
-        maze_generator::prelude::Direction::North => {
+        Direction::North => {
             (0f32, CELL_SIZE * -0.5, Vec2::new(CELL_SIZE + MAJOR_LINE_THICKNESS * 0.5, MAJOR_LINE_THICKNESS ))
         },
-        maze_generator::prelude::Direction::South => {
+        Direction::South => {
             ( 0f32, CELL_SIZE * 0.5, Vec2::new( CELL_SIZE + MAJOR_LINE_THICKNESS * 0.5, MAJOR_LINE_THICKNESS,))
         },
-        maze_generator::prelude::Direction::East => {
+        Direction::East => {
             ( CELL_SIZE * 0.5, 0f32, Vec2::new(MAJOR_LINE_THICKNESS, CELL_SIZE + MAJOR_LINE_THICKNESS * 0.5))
         },
-        maze_generator::prelude::Direction::West => {
+        Direction::West => {
             ( CELL_SIZE * -0.5, 0f32, Vec2::new(MAJOR_LINE_THICKNESS, CELL_SIZE+ MAJOR_LINE_THICKNESS * 0.5))
         },
     };
@@ -255,7 +262,7 @@ fn spawn_wall(commands: &mut Commands, parent: Entity,  material: Handle<ColorMa
         material: material,
         transform: Transform::from_xyz( x, y, 1.0),
         ..Default::default()
-       }).insert(Cell::Wall)
+       }).insert(Wall)
        .id();
 
        // add the child to the parent
