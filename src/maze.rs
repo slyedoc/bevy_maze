@@ -6,7 +6,7 @@ use maze_generator::prelude::{Coordinates, Direction as Direction, FieldType, Ge
 /// Creates a SIZE x SIZE maze at world orgin
 
 use crate::maze::config::*;
-mod config {
+pub mod config {
     use super::*;
 
     // Colors
@@ -26,6 +26,7 @@ mod config {
     pub const MINOR_LINE_THICKNESS: f32 = CELL_SIZE * 0.01;
     pub const MAJOR_LINE_THICKNESS: f32 = CELL_SIZE * 0.1;
 
+    // These are generated for positioning in the center of the world
     pub const MAZE_BOARD_SIZE: (f32, f32) = ( MAZE_SIZE.0 as f32 * CELL_SIZE, MAZE_SIZE.1 as f32 * CELL_SIZE);
     pub const MAZE_BOARD_LEFT_EDGE: f32 = - 0.5 * MAZE_BOARD_SIZE.0 as f32 ;
     pub const MAZE_BOARD_BOT_EDGE: f32 = -0.5 * MAZE_BOARD_SIZE.1 as f32;

@@ -2,17 +2,20 @@
 use bevy::prelude::*;
 use fps::FPSPlugin;
 use maze::MazePlugin;
+use player::PlayerPlugin;
 
 mod maze;
 mod fps;
 mod camera;
+mod player;
 
-#[allow(dead_code)]
-enum GameState {
-    Loading,
-    Menu,
-    Playing,
-}
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+ enum AppState {
+     Loading,
+     //Menu,
+     //Playing,
+ }
 
 fn main() {
     App::build()
@@ -24,17 +27,37 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
 
+
+        .add_state(AppState::Loading)
+
+        
+        // // A state's "enter" schedule is run once when the state is entered
+        // .state_enter(AppState::Loading, SystemStage::parallel()
+        //     .with_system(setup)     
+        //     .with_system(load_textures)     
+        // )
+
         //config
         .add_startup_system(camera::spawn_cameras.system())
+        .add_system(camera::pan_orbit_camera.system())
         .add_plugin(MazePlugin)
+        .add_plugin(PlayerPlugin)
         .add_plugin(FPSPlugin)
         .run();
 }
 
-#[allow(dead_code)]
-// Labels for order of operations for systems
-#[derive(SystemLabel, Clone, Hash, Copy, PartialEq, Eq, Debug)]
-enum CommonLabels {
-    Input,
-    Action,
-}
+// #[allow(dead_code)]
+// // Labels for order of operations for systems
+// #[derive(SystemLabel, Clone, Hash, Copy, PartialEq, Eq, Debug)]
+// enum CommonLabels {
+//     Input,
+//     Action,
+// }
+
+
+// #[allow(dead_code)]
+// enum GameState {
+//     Loading,
+//     Menu,
+//     Playing,
+// }

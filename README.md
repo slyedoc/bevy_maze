@@ -1,10 +1,14 @@
 # bevy_maze
 
-Simple Maze app in rust and bevy
+Simple Maze app in rust and bevy.
 
-<img src="./images/30x20.png" alt="30x20" width="500">
+Created this as an example game for a friend.
 
-<img src="./images/40x40.png" alt="40x40" width="500">
+![Image of 30x20](./images/30x20.png | width=100)
+
+## features
+
+- maze size and look easy to [change](./src/maze.rs)
 
 ## Notes
 
