@@ -1,19 +1,22 @@
 #[allow(dead_code)]
 use bevy::prelude::*;
+use bevy_egui::EguiPlugin;
 use fps::FPSPlugin;
 use maze::MazePlugin;
+use menu::MenuPlugin;
 use player::PlayerPlugin;
 
 mod maze;
 mod fps;
 mod camera;
 mod player;
+mod menu;
 
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
  enum AppState {
      Loading,
-     //Menu,
+     Menu,
      //Playing,
  }
 
@@ -26,15 +29,15 @@ fn main() {
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(EguiPlugin)
+
+        .add_state(AppState::Menu)
 
 
-        .add_state(AppState::Loading)
-
-        
         // // A state's "enter" schedule is run once when the state is entered
         // .state_enter(AppState::Loading, SystemStage::parallel()
-        //     .with_system(setup)     
-        //     .with_system(load_textures)     
+        //     .with_system(setup)
+        //     .with_system(load_textures)
         // )
 
         //config
@@ -43,6 +46,7 @@ fn main() {
         .add_plugin(MazePlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(FPSPlugin)
+        .add_plugin(MenuPlugin)
         .run();
 }
 

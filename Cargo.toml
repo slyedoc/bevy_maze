@@ -10,7 +10,5 @@ bevy = { version = "0.5", features = ["dynamic"] }
 bevy_egui = "0.5"
 maze_generator = { git = "https://github.com/slyedoc/maze_generator.git" }
 
-
-# This 
 #[profile.dev.package.'*']
 #opt-level = 3
