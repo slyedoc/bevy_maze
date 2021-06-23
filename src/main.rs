@@ -1,24 +1,26 @@
 #[allow(dead_code)]
 use bevy::prelude::*;
 use bevy_egui::EguiPlugin;
+use camera::CameraPlugin;
 use fps::FPSPlugin;
-use maze::MazePlugin;
-use menu::MenuPlugin;
+use grid::GridPlugin;
+use maze::{MazePlugin, MazeSize};
+use states::*;
 use player::PlayerPlugin;
 
-mod maze;
-mod fps;
 mod camera;
+mod cleanup;
+mod fps;
+mod grid;
+mod maze;
 mod player;
-mod menu;
-
+mod states;
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
- enum AppState {
-     Loading,
-     Menu,
-     //Playing,
- }
+enum AppState {
+    Menu,
+    Playing,
+}
 
 fn main() {
     App::build()
@@ -31,22 +33,18 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
 
+        // Setup
         .add_state(AppState::Menu)
-
-
-        // // A state's "enter" schedule is run once when the state is entered
-        // .state_enter(AppState::Loading, SystemStage::parallel()
-        //     .with_system(setup)
-        //     .with_system(load_textures)
-        // )
-
-        //config
-        .add_startup_system(camera::spawn_cameras.system())
-        .add_system(camera::pan_orbit_camera.system())
+        .add_plugin(CameraPlugin)
+        .insert_resource(MazeSize { x: 11u8, y: 10u8 })
+        .add_plugin(GridPlugin) // runs during playing
         .add_plugin(MazePlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(FPSPlugin)
+
+        // Load state logic
         .add_plugin(MenuPlugin)
+        .add_plugin(PlayingPlugin)
         .run();
 }
 
@@ -56,12 +54,4 @@ fn main() {
 // enum CommonLabels {
 //     Input,
 //     Action,
-// }
-
-
-// #[allow(dead_code)]
-// enum GameState {
-//     Loading,
-//     Menu,
-//     Playing,
 // }
